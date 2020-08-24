@@ -16,11 +16,10 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("🔥connected🔥");
-  startPrompt();
+  askPrompt();
 });
 
-function startPrompt() {
-  console.log("WELCOME TO THE EMPLOYEE MANAGEMENT SYSTEM");
+function askPrompt() {
   inquirer
     .prompt([
       {
@@ -33,6 +32,7 @@ function startPrompt() {
           "Add a department",
           "Add an employee",
           "Add a role",
+          "EXIT",
         ],
         name: "action",
       },
@@ -46,8 +46,48 @@ function startPrompt() {
           viewEmployees();
           break;
         case "View roles":
-          viewRoles();
+          viewRole();
+          break;
+        case "EXIT":
+          exitApp();
           break;
       }
     });
+}
+
+function viewDepartments() {
+  var query = "SELECT * FROM department";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.log("all departments: ", res);
+    console.table(res);
+    console.log("============");
+    askPrompt();
+  });
+}
+
+function viewEmployees() {
+  var query = "SELECT * FROM employee";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.log("all employees: ", res);
+    console.table(res);
+    console.log("============");
+    askPrompt();
+  });
+}
+
+function viewRole() {
+  var query = "SELECT * FROM role";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.log("all roles: ", res);
+    console.table(res);
+    console.log("============");
+    askPrompt();
+  });
+}
+
+function exitApp() {
+  process.exit(0);
 }
