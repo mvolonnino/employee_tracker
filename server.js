@@ -27,11 +27,11 @@ function askPrompt() {
         message: "Select what you would like to do:",
         choices: [
           "View departments",
-          "View employees",
           "View roles",
-          "Add a department",
-          "Add an employee",
-          "Add a role",
+          "View employees",
+          "Add department",
+          "Add role",
+          "Add employee",
           "EXIT",
         ],
         name: "action",
@@ -48,13 +48,13 @@ function askPrompt() {
         case "View roles":
           viewRole();
           break;
-        case "Add a department":
+        case "Add department":
           addDepartment();
           break;
-        case "Add an employee":
+        case "Add employee":
           addEmployee();
           break;
-        case "Add a role":
+        case "Add role":
           addRole();
           break;
         case "EXIT":
@@ -92,7 +92,7 @@ function viewEmployees() {
 // view roles combined with the department name
 function viewRole() {
   var query =
-    "SELECT department.dept_name, role.title, role.salary FROM department INNER JOIN role ON department.id=role.department_id ORDER BY dept_name";
+    "SELECT department.id, department.dept_name, role.title, role.salary FROM department INNER JOIN role ON department.id=role.department_id ORDER BY id";
   connection.query(query, function (err, res) {
     if (err) throw err;
     // console.log("all roles: ", res);
@@ -102,6 +102,7 @@ function viewRole() {
   });
 }
 
+// add a new department - must be unique
 function addDepartment() {
   inquirer
     .prompt({
@@ -116,7 +117,7 @@ function addDepartment() {
         res
       ) {
         if (err) throw err;
-        console.log("added new department");
+        console.log("Added new department");
         console.log(
           "============================================================"
         );
@@ -125,6 +126,7 @@ function addDepartment() {
     });
 }
 
+// add a new employee with first and last name, and role title
 function addEmployee() {
   var empRole = "SELECT * FROM role ORDER BY id";
   connection.query(empRole, function (err, res) {
@@ -133,7 +135,7 @@ function addEmployee() {
     for (var i = 0; i < res.length; i++) {
       empArr.push(res[i].id + ": " + res[i].title);
     }
-    console.log("empArr: ", empArr);
+    // console.log("empArr: ", empArr);
     inquirer
       .prompt([
         {
@@ -160,7 +162,7 @@ function addEmployee() {
           {
             first_name: answer.first,
             last_name: answer.last,
-            role_id: parseInt(answer.role.split("")),
+            role_id: parseInt(answer.role.split(" ")),
           },
           function (err, res) {
             if (err) throw err;
@@ -175,6 +177,7 @@ function addEmployee() {
   });
 }
 
+// add a new role from the existing deptartments with base salary
 function addRole() {
   var dept = "SELECT * FROM department ORDER BY id";
   connection.query(dept, function (err, res) {
@@ -209,7 +212,7 @@ function addRole() {
           {
             title: answer.role,
             salary: answer.salary,
-            department_id: parseInt(answer.department.split("")),
+            department_id: parseInt(answer.department.split(" ")),
           },
           function (err, res) {
             if (err) throw err;
@@ -226,5 +229,7 @@ function addRole() {
 
 // exit out of the application
 function exitApp() {
+  console.log("Exiting the application...");
+  console.log("============================================================");
   process.exit(0);
 }
