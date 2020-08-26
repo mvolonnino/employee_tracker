@@ -205,7 +205,7 @@ function addRole() {
         },
       ])
       .then(function (answer) {
-        console.log("answer: ", answer);
+        // console.log("answer: ", answer);
         var query = "INSERT INTO role SET ?";
         connection.query(
           query,
