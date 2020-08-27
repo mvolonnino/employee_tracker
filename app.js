@@ -20,7 +20,7 @@ connection.connect(function (err) {
 });
 
 function askPrompt() {
-  console.log("Welcome to the employee database!");
+  console.log("**** WELCOME TO THE EMPLOYEE DATABASE APPLICATION ****");
   inquirer
     .prompt([
       {
@@ -34,7 +34,7 @@ function askPrompt() {
           "Add role",
           "Add employee",
           "Remove employee",
-          "Update employee role",
+          // "Update employee role",
           "EXIT",
         ],
         name: "action",
@@ -63,9 +63,9 @@ function askPrompt() {
         case "Remove employee":
           remEmployee();
           break;
-        case "Update employee role":
-          updateEmpRole();
-          break;
+        // case "Update employee role":
+        //   updateEmpRole();
+        //   break;
         case "EXIT":
           exitApp();
           break;
@@ -281,43 +281,43 @@ function remEmployee() {
   });
 }
 
-// update employe roles
-function updateEmpRole() {
-  var viewEmpTable =
-    "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dept_name FROM employee INNER JOIN role ON role_id=role.id INNER JOIN department ON department.id=role.department_id;";
-  var empTable = [];
-  connection.query(viewEmpTable, function (err, res) {
-    console.log("res: ", res);
-    if (err) throw err;
-    for (var i = 0; i < res.length; i++) {
-      empTable.push(
-        res[i].id +
-          ": " +
-          res[i].first_name +
-          " " +
-          res[i].last_name +
-          "'s role as " +
-          res[i].title
-      );
-    }
-    console.log("empTable ", empTable);
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          message:
-            "Select which employee you would like to update their role to:",
-          choices: empTable,
-          name: "employee",
-        },
-      ])
-      .then(function (answer) {
-        console.log("answer ", answer);
-      });
-  });
+// update employe roles -> coming soon!
+// function updateEmpRole() {
+//   var viewEmpTable =
+//     "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dept_name FROM employee INNER JOIN role ON role_id=role.id INNER JOIN department ON department.id=role.department_id;";
+//   var empTable = [];
+//   connection.query(viewEmpTable, function (err, res) {
+//     console.log("res: ", res);
+//     if (err) throw err;
+//     for (var i = 0; i < res.length; i++) {
+//       empTable.push(
+//         res[i].id +
+//           ": " +
+//           res[i].first_name +
+//           " " +
+//           res[i].last_name +
+//           "'s role as " +
+//           res[i].title
+//       );
+//     }
+//     console.log("empTable ", empTable);
+//     inquirer
+//       .prompt([
+//         {
+//           type: "list",
+//           message:
+//             "Select which employee you would like to update their role to:",
+//           choices: empTable,
+//           name: "employee",
+//         },
+//       ])
+//       .then(function (answer) {
+//         console.log("answer ", answer);
+//       });
+//   });
 
-  // var update = "UPDATE role SET ? WHERE ?"
-}
+//   // var update = "UPDATE role SET ? WHERE ?"
+// }
 
 // exit out of the application
 function exitApp() {
