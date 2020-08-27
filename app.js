@@ -8,7 +8,7 @@ var connection = mysql.createConnection({
   host: "localhost",
   port: "3306",
   user: "root",
-  password: "",
+  password: process.env.MYSQL_KEY,
   database: "employee_db",
 });
 
@@ -290,15 +290,13 @@ function remEmployee() {
 //     console.log("res: ", res);
 //     if (err) throw err;
 //     for (var i = 0; i < res.length; i++) {
-//       empTable.push(
-//         res[i].id +
-//           ": " +
-//           res[i].first_name +
-//           " " +
-//           res[i].last_name +
-//           "'s role as " +
-//           res[i].title
-//       );
+//       empTable.push({
+//         id: res[i],
+//         firstName: res[i].first_name,
+//         lastName: res[i].last_name,
+//         title: res[i].title,
+
+//       });
 //     }
 //     console.log("empTable ", empTable);
 //     inquirer
