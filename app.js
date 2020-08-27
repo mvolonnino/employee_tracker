@@ -20,6 +20,7 @@ connection.connect(function (err) {
 });
 
 function askPrompt() {
+  console.log("Welcome to the employee database!");
   inquirer
     .prompt([
       {
@@ -32,6 +33,8 @@ function askPrompt() {
           "Add department",
           "Add role",
           "Add employee",
+          "Remove employee",
+          "Update employee role",
           "EXIT",
         ],
         name: "action",
@@ -51,11 +54,17 @@ function askPrompt() {
         case "Add department":
           addDepartment();
           break;
+        case "Add role":
+          addRole();
+          break;
         case "Add employee":
           addEmployee();
           break;
-        case "Add role":
-          addRole();
+        case "Remove employee":
+          remEmployee();
+          break;
+        case "Update employee role":
+          updateEmpRole();
           break;
         case "EXIT":
           exitApp();
@@ -76,7 +85,7 @@ function viewDepartments() {
   });
 }
 
-// view employees with their role title, role salary, and dept_name
+// view employees with their is, role title, role salary, and dept_name
 function viewEmployees() {
   var query =
     "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dept_name FROM employee INNER JOIN role ON role_id=role.id INNER JOIN department ON department.id=role.department_id;";
@@ -126,6 +135,63 @@ function addDepartment() {
     });
 }
 
+// validate that an input is only numbers
+function validSalary(salary) {
+  var reg = /^\d+$/;
+  return reg.test(salary) || "Salary should be a number, delete and re enter";
+}
+
+// add a new role from the existing deptartments with base salary
+function addRole() {
+  var dept = "SELECT * FROM department ORDER BY id";
+  connection.query(dept, function (err, res) {
+    var deptArr = [];
+    for (var i = 0; i < res.length; i++) {
+      deptArr.push(res[i].id + ": " + res[i].dept_name);
+    }
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Choose the department to add the role too:",
+          choices: deptArr,
+          name: "department",
+        },
+        {
+          type: "input",
+          message: "What is title of the role you want to add?",
+          name: "role",
+        },
+        {
+          type: "input",
+          message: "What is the starting salary?",
+          name: "salary",
+          validate: validSalary,
+        },
+      ])
+      .then(function (answer) {
+        // console.log("answer: ", answer);
+        var query = "INSERT INTO role SET ?";
+        connection.query(
+          query,
+          {
+            title: answer.role,
+            salary: answer.salary,
+            department_id: parseInt(answer.department.split(" ")),
+          },
+          function (err, res) {
+            if (err) throw err;
+            console.log("Added new role");
+            console.log(
+              "============================================================"
+            );
+            askPrompt();
+          }
+        );
+      });
+  });
+}
+
 // add a new employee with first and last name, and role title
 function addEmployee() {
   var empRole = "SELECT * FROM role ORDER BY id";
@@ -160,8 +226,8 @@ function addEmployee() {
         connection.query(
           query,
           {
-            first_name: answer.first,
-            last_name: answer.last,
+            first_name: answer.first.trim(),
+            last_name: answer.last.trim(),
             role_id: parseInt(answer.role.split(" ")),
           },
           function (err, res) {
@@ -177,46 +243,34 @@ function addEmployee() {
   });
 }
 
-// add a new role from the existing deptartments with base salary
-function addRole() {
-  var dept = "SELECT * FROM department ORDER BY id";
-  connection.query(dept, function (err, res) {
-    var deptArr = [];
+// deletes employee by id from employees table
+function remEmployee() {
+  var employee = "SELECT * FROM employee ORDER BY id";
+  connection.query(employee, function (err, res) {
+    if (err) throw err;
+    var empArr = [];
     for (var i = 0; i < res.length; i++) {
-      deptArr.push(res[i].id + ": " + res[i].dept_name);
+      empArr.push(
+        res[i].id + ": " + res[i].first_name + " " + res[i].last_name
+      );
     }
     inquirer
       .prompt([
         {
           type: "list",
-          message: "Choose the department to add the role too:",
-          choices: deptArr,
-          name: "department",
-        },
-        {
-          type: "input",
-          message: "What is title of the role you want to add?",
-          name: "role",
-        },
-        {
-          type: "number",
-          message: "What is the starting salary?",
-          name: "salary",
+          message: "Select which employee you would like to remove:",
+          choices: empArr,
+          name: "remove",
         },
       ])
       .then(function (answer) {
-        // console.log("answer: ", answer);
-        var query = "INSERT INTO role SET ?";
+        var query = "DELETE FROM employee WHERE ?";
         connection.query(
           query,
-          {
-            title: answer.role,
-            salary: answer.salary,
-            department_id: parseInt(answer.department.split(" ")),
-          },
+          { id: parseInt(answer.remove.split(" ")) },
           function (err, res) {
             if (err) throw err;
-            console.log("Added new role");
+            console.log("Removed " + answer.remove + " from employees");
             console.log(
               "============================================================"
             );
@@ -225,6 +279,44 @@ function addRole() {
         );
       });
   });
+}
+
+// update employe roles
+function updateEmpRole() {
+  var viewEmpTable =
+    "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dept_name FROM employee INNER JOIN role ON role_id=role.id INNER JOIN department ON department.id=role.department_id;";
+  var empTable = [];
+  connection.query(viewEmpTable, function (err, res) {
+    console.log("res: ", res);
+    if (err) throw err;
+    for (var i = 0; i < res.length; i++) {
+      empTable.push(
+        res[i].id +
+          ": " +
+          res[i].first_name +
+          " " +
+          res[i].last_name +
+          "'s role as " +
+          res[i].title
+      );
+    }
+    console.log("empTable ", empTable);
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message:
+            "Select which employee you would like to update their role to:",
+          choices: empTable,
+          name: "employee",
+        },
+      ])
+      .then(function (answer) {
+        console.log("answer ", answer);
+      });
+  });
+
+  // var update = "UPDATE role SET ? WHERE ?"
 }
 
 // exit out of the application
