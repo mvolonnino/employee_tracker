@@ -22,6 +22,8 @@
 
 This application is an employee database that allows you to view/add departments, roles and employees.
 
+`check the => video folder => 'view raw' to see a tutorial`
+
 ![image of employee tracker CLI](img/Screen%20Shot%202020-08-25%20at%2011.27.21%20PM.png)
 
 ## License:
